@@ -3,11 +3,11 @@ from .models import Category, Article
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    readonly_fields = ('id')
+    readonly_fields = ('id',)
 
 
 class ArticleAdmin(admin.ModelAdmin):
-    readonly_fields = ('id')
+    readonly_fields = ('id',)
 
 
 admin.site.register(Category, CategoryAdmin)
