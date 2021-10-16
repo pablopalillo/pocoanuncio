@@ -26,6 +26,7 @@ class Scraper:
 
     def _get_dom_web_page(self) -> None:
         """Parser DOM information and set in dom_parser attribute"""
+
         if(self._validate_url()):
             page_request = requests.get(self.url)
             self.dom_parser = BeautifulSoup(
@@ -66,6 +67,26 @@ class Scraper:
             )
 
         return items_founds_dom
+
+    def get_elements_by_attr(self, class_element: str, attr: str) -> list:
+        """
+        Get DOM especific repetitive elements and return a list
+
+        Params:
+        class_element : str Name of class o DOM element
+
+        attr : attr of DOM element
+
+        Rerturn:
+        list of repetitive DOM elements with the same class
+        """
+        items_founds_dom = None
+        if class_element is not None:
+            items_founds_dom = self.dom_parser.find_all(
+                class_=class_element
+            )
+
+        return items_founds_dom.get('href')
 
     def _validate_url(self) -> bool:
         """ Validate if the url is well formed """
