@@ -20,6 +20,7 @@ class Category(models.Model):
         null=True
     )
     name = models.CharField(max_length=15)
+    slug = models.SlugField(max_length=400)
     status = models.CharField(
         max_length=1,
         choices=StatusChoices.choices,
