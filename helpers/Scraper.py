@@ -22,9 +22,9 @@ class Scraper:
 
     def __init__(self, url: str) -> None:
         self.url = url
-        self.get_dom_web_page()
+        self._get_dom_web_page()
 
-    def get_dom_web_page(self) -> None:
+    def _get_dom_web_page(self) -> None:
         """Parser DOM information and set in dom_parser attribute"""
         if(self._validate_url()):
             page_request = requests.get(self.url)
@@ -32,6 +32,21 @@ class Scraper:
                 page_request.content,
                 'html.parser'
             )
+
+    def get_list_elements_by_class(self, class_element: str) -> list:
+        """
+        Get text content of DOM element list
+
+        Params:
+        class_element : str Name of class o DOM element
+
+        Rerturn:
+        list of repetitive text with the same class
+        """
+
+        return [
+            el.text for el in self.get_dom_elements_by_class(class_element)
+        ]
 
     def get_dom_elements_by_class(self, class_element: str) -> list:
         """
@@ -41,7 +56,7 @@ class Scraper:
         class_element : str Name of class o DOM element
 
         Rerturn:
-        list of repetitive elements with the same class
+        list of repetitive DOM elements with the same class
         """
         items_founds_dom = None
         if class_element is not None:
