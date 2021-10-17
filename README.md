@@ -33,7 +33,7 @@ Todo esto con ayuda del asistente de Django y el ambiente virtual ac
 manage.py migrate
 ```
 
-Si prefieres en la raiz del proyecto existe un archivo llamado **database.db** en el encontrará los scripts para bases de datos con motor Mysql.
+Si prefieres en la raiz del proyecto existe un archivo llamado **database.sql** en el encontrará los scripts para bases de datos con motor Mysql.
 
 ### Pruebas unitarias
 
