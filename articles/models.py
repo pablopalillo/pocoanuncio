@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from helpers.scraper import Scraper
-from django.db import models
+from django.db import models, DatabaseError
 
 
 class CategoryManagerFillData(models.Manager):
@@ -16,6 +16,11 @@ class CategoryManagerFillData(models.Manager):
 
     def save_scrap_data(self) -> None:
         web_dom = Scraper(self.web_url)
+        self._save_scrap_categories(web_dom)
+        self._save_scrap_subcategories(web_dom)
+
+    def _save_scrap_categories(self, web_dom: Scraper) -> None:
+
         element_class = "ma-MainCategory-mainCategoryNameLink"
         titles_cat_dom = web_dom.get_list_elements_by_class(element_class)
         url_cat_dom = web_dom.get_list_elements_by_attr(element_class, "href")
@@ -24,13 +29,54 @@ class CategoryManagerFillData(models.Manager):
         if categoy_objects:
             self.save_categories(categoy_objects)
 
-    def _fill_category_data(self, titles: list, urls: list) -> list:
+    def _save_scrap_subcategories(self, web_dom: Scraper) -> None:
+
+        class_dom = "ma-SharedCrosslinks-list ma-SharedCrosslinks-list--row"
+        list_dom = web_dom.get_dom_elements_by_class(class_dom)
+
+        categories_ids = list(Category.objects.all())
+        subcategory_objects = []  # list of subcategories
+
+        if categories_ids:
+            for index, item_list in enumerate(list_dom):
+                items_found_dom = [
+                    link.text
+                    for link in item_list.find_all("a")
+                    ]
+
+                urls_found_dom = [
+                    link.get("href")
+                    for link in item_list.find_all("a")
+                ]
+
+                subcategory_objects += \
+                    self._fill_category_data(
+                        items_found_dom,
+                        urls_found_dom,
+                        categories_ids[index]
+                    )
+
+        self.save_categories(subcategory_objects)
+
+    def _fill_category_data(
+        self,
+        titles: list,
+        urls: list,
+        category=None
+    ) -> list:
         """ Fill list of Categories Model objects"""
+
         category_objects = []  # list of objects
 
         if titles and urls:
             for index, title in enumerate(titles):
-                category_objects.append(Category(name=title, slug=urls[index]))
+                category_objects.append(
+                    Category(
+                        name=title,
+                        slug=urls[index],
+                        subcategory=category
+                    )
+                )
         return category_objects
 
     def save_categories(self, categories: list) -> None:
@@ -38,7 +84,17 @@ class CategoryManagerFillData(models.Manager):
 
         if categories:
             size_list = len(categories)
-            Category.objects.bulk_create(categories, size_list)
+
+            try:
+                Category.objects.bulk_create(
+                    categories,
+                    size_list,
+                    ignore_conflicts=True
+                )
+            except DatabaseError:
+                raise False
+
+            return True
 
 
 class Category(models.Model):

@@ -49,6 +49,26 @@ class Scraper:
             el.text for el in self.get_dom_elements_by_class(class_element)
         ]
 
+    def get_list_elements_by_attr(
+        self,
+        class_element: str,
+        attr: str
+    ) -> list:
+        """
+        Get text content of DOM element list
+
+        Params:
+        class_element : str Name of class o DOM element
+
+        Rerturn:
+        list of repetitive text with the same class
+        """
+
+        return [
+            el.get(attr) for el in
+            self.get_doom_elements_by_attr(class_element)
+        ]
+
     def get_dom_elements_by_class(self, class_element: str) -> list:
         """
         Get DOM especific repetitive elements and return a list
@@ -62,13 +82,12 @@ class Scraper:
         items_founds_dom = None
         if class_element is not None:
             items_founds_dom = self.dom_parser.find_all(
-                "a",
                 class_=class_element
             )
 
         return items_founds_dom
 
-    def get_elements_by_attr(self, class_element: str, attr: str) -> list:
+    def get_doom_elements_by_attr(self, class_element: str) -> list:
         """
         Get DOM especific repetitive elements and return a list
 
@@ -86,7 +105,7 @@ class Scraper:
                 class_=class_element
             )
 
-        return items_founds_dom.get('href')
+        return items_founds_dom
 
     def _validate_url(self) -> bool:
         """ Validate if the url is well formed """
