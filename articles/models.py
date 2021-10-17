@@ -143,7 +143,9 @@ class ArticleManagerFillData(models.Manager):
     def save_scrap_data(self) -> None:
 
         subcategories_slugs = list(
-            Category.objects.filter(subcategory__isnull=True).only("id", "slug")
+            Category.objects.filter(
+                subcategory__isnull=True
+            ).only("id", "slug")
         )
 
         for cat in subcategories_slugs:

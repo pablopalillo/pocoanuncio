@@ -1,19 +1,17 @@
 {% extends "index.html" %}
 
- {% block content %}
-    <div class="four columns">
-        <h3>Adipiscing Elit</h3>
-        <p><em>Vivamus tortor tellus, rutrum sit amet mollis vel, imperdiet consectetur orci.</em></p>
-    </div>
-    
-    <div class="four columns">
-        <h3>Adipiscing Elit</h3>
-        <p><em>Vivamus tortor tellus, rutrum sit amet mollis vel, imperdiet consectetur orci.</em></p>
-    </div>
-    
-    <div class="four columns">
-        <h3>Adipiscing Elit</h3>
-        <p><em>Vivamus tortor tellus, rutrum sit amet mollis vel, imperdiet consectetur orci.</em></p>
-    </div>
-  
- {% endblock %}
+{% block content %}
+<section class="section-categories">
+    <h2>Categorias: </h2>
+
+       {% if categories %}
+           <div class="row">
+           {% for category in categories %}
+               <div class="col-2 columns">
+                   <h4><a href="/category/{{category.id}}">{{ category.name }}</a></h4>
+               </div>
+           {% endfor %}
+           </div>
+       {% endif %}
+</section>
+{% endblock %}  
