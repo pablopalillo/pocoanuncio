@@ -37,6 +37,5 @@ class TestCategoryModel(TestCase):
     def test_category_manager_save_data(self):
         Category.objects.save_scrap_data()
         test_categories = Category.objects.all()
-        print("_-- test --")
-        print(test_categories)
+
         self.assertIsNotNone(test_categories, "data not inserted")

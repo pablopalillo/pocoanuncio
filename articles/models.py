@@ -130,6 +130,75 @@ class Category(models.Model):
         verbose_name_plural = "Categories"
 
 
+class ArticleManagerFillData(models.Manager):
+    """
+    Manager for Article Model this fill data for each Categories,
+    using the srapping method.
+
+    Params:
+    web_url : str origin valid url
+    """
+    web_url = "https://www.milanuncios.com"
+
+    def save_scrap_data(self) -> None:
+
+        subcategories_slugs = list(
+            Category.objects.filter(subcategory__isnull=True).only("id", "slug")
+        )
+
+        for cat in subcategories_slugs:
+            category_url = f"{self.web_url}{cat.slug}"
+            web_dom = Scraper(category_url)
+            self._save_scrap_article_by_cat(web_dom, cat)
+
+    def _save_scrap_article_by_cat(self, web_dom: Scraper, category: Category):
+
+        articles_data = self._fill_article_data(web_dom, category)
+
+        if articles_data:
+            size_list = len(articles_data)
+            try:
+                Category.objects.bulk_create(
+                    articles_data,
+                    size_list,
+                    ignore_conflicts=True
+                )
+            except DatabaseError:
+                raise False
+
+        return True
+
+    def _fill_article_data(self, web_dom: Scraper, category: Category) -> dict:
+        """ Add DOM scrap articles data per subcategory """
+
+        class_dom = "ma-AdCard-titleLink"
+        titles_art = self.get_article_elements(web_dom, class_dom)
+
+        class_dom = "ma-AdCardDescription-text"
+        desc_art = self.get_article_elements(web_dom, class_dom)
+
+        class_dom = "ma-AdPrice-value ma-AdPrice-value--default"
+        price_art = self.get_article_elements(web_dom, class_dom)
+
+        articles = []  # estructure of articles
+
+        for index, title in enumerate(titles_art):
+
+            article = {
+                'title': title,
+                'category': category,
+                'description': desc_art[index],
+                'price': price_art[index]
+            }
+            articles.append(article)
+
+        return articles
+
+    def get_article_elements(self, web_dom: Scraper, class_name):
+
+        return web_dom.get_list_elements_by_class(class_name)
+
+
 class Article(models.Model):
     id = models.AutoField(primary_key=True)
     category = models.ForeignKey(
@@ -139,7 +208,8 @@ class Article(models.Model):
     )
     title = models.CharField(max_length=35)
     description = models.TextField(null=True)
-    img_url = models.CharField(max_length=200, null=True)
+    price = models.CharField(max_length=13, null=True)
+    objects = ArticleManagerFillData()
 
     def __str__(self) -> str:
         return self.title
